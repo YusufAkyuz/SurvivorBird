@@ -11,11 +11,15 @@ public class SurvivorBird extends ApplicationAdapter {
 	SpriteBatch batch;
 	Texture background;
 	Texture bird;
+	Texture bee1;
+	Texture bee2;
+	Texture bee3;
 	float birdX = 0;
 	float birdY = 0;
 	int gameState = 0;		//Oyunun başlayıp başlamadığını kontrol edecek
 	float velocity;
-	float gravity = 0.41f;
+	float gravity = 0.7f;
+	float enemyX = 0;
 
 
 	@Override
@@ -24,9 +28,14 @@ public class SurvivorBird extends ApplicationAdapter {
 		batch = new SpriteBatch();
 		background = new Texture("background.png");
 		bird = new Texture("bird.png");
+		bee1 = new Texture("bee.png");
+		bee2 = new Texture("bee.png");
+		bee3 = new Texture("bee.png");
 
 		birdX = Gdx.graphics.getWidth() / 3;
 		birdY = Gdx.graphics.getHeight() / 2;
+
+		enemyX = Gdx.graphics.getWidth();
 
 
 	}
@@ -34,11 +43,20 @@ public class SurvivorBird extends ApplicationAdapter {
 	@Override
 	public void render () {
 
+		batch.begin();
+
+		batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
 		if (gameState == 1) {
 
+			batch.draw(bee1, enemyX, 50, Gdx.graphics.getWidth()/20, Gdx.graphics.getHeight()/13);
+			batch.draw(bee1, enemyX, 100, Gdx.graphics.getWidth()/20, Gdx.graphics.getHeight()/13);
+			batch.draw(bee1, enemyX, 150, Gdx.graphics.getWidth()/20, Gdx.graphics.getHeight()/13);
+
+			enemyX = enemyX - 10;
+
 			if (Gdx.input.justTouched()) {
-				velocity = -11.8f;
+				velocity = -13.5f;
 
 			}
 
@@ -54,11 +72,7 @@ public class SurvivorBird extends ApplicationAdapter {
 			}
 		}
 
-		batch.begin();
-
-		batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		batch.draw(bird, birdX, birdY , Gdx.graphics.getWidth()/20, Gdx.graphics.getHeight()/13);
-
 
 		batch.end();
 
