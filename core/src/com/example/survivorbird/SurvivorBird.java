@@ -4,9 +4,11 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 import java.util.Random;
@@ -46,6 +48,12 @@ public class SurvivorBird extends ApplicationAdapter {
 	Circle[] enemyCircle3;
 
 	ShapeRenderer shapeRenderer;
+
+	int score = 0;
+	int scoreEnemy = 0;
+
+	BitmapFont font;
+	BitmapFont fontGameOver;
 
 
 	@Override
@@ -87,6 +95,14 @@ public class SurvivorBird extends ApplicationAdapter {
 			enemyCircle3[i] = new Circle();
 		}
 
+		font = new BitmapFont();
+		font.setColor(Color.BLACK);
+		font.getData().setScale(4);
+
+		fontGameOver = new BitmapFont();
+		fontGameOver.setColor(Color.BROWN);
+		fontGameOver.getData().setScale(6);
+
 
 	}
 
@@ -97,10 +113,19 @@ public class SurvivorBird extends ApplicationAdapter {
 
 		batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-		
-		
+
+
 		if (gameState == 1) {
-			
+
+			if (enemyX[scoreEnemy] < birdX) {
+				score++;
+				if (scoreEnemy < numberOfEnemies -1) {
+					scoreEnemy++;
+				}else {
+					scoreEnemy = 0;
+				}
+			}
+
 			if (Gdx.input.justTouched()) {
 			velocity = -13.5f;
 			}
@@ -118,7 +143,7 @@ public class SurvivorBird extends ApplicationAdapter {
 					enemyX[i] = enemyX[i] - enemyVelocity;
 				}
 
-			
+
 				batch.draw(bee1, enemyX[i], Gdx.graphics.getHeight()/2 + enemyOffSet1[i], Gdx.graphics.getWidth()/20, Gdx.graphics.getHeight()/13);
 				batch.draw(bee1, enemyX[i], Gdx.graphics.getHeight()/2 + enemyOffSet2[i], Gdx.graphics.getWidth()/20, Gdx.graphics.getHeight()/13);
 				batch.draw(bee1, enemyX[i], Gdx.graphics.getHeight()/2 + enemyOffSet3[i], Gdx.graphics.getWidth()/20, Gdx.graphics.getHeight()/13);
@@ -134,38 +159,85 @@ public class SurvivorBird extends ApplicationAdapter {
 
 
 
-			if (birdY > 0 || velocity < 0) {
+			if (birdY > 0) {
 				velocity = velocity + gravity;
 				birdY = birdY - velocity;
+			}else {
+				gameState = 2;
 			}
 
 
-		}else {
+		}else if (gameState == 0){
 			if (Gdx.input.justTouched()) {
 				gameState = 1;
 			}
+		} else if (gameState ==2){
+
+			fontGameOver.draw(batch, "Game Over Tap to Play Again" , Gdx.graphics.getWidth() /10, Gdx.graphics.getHeight()/2);
+
+
+			if (Gdx.input.justTouched()) {
+				gameState = 1;
+				birdY = Gdx.graphics.getHeight() / 2;
+
+				for (int i = 0; i < numberOfEnemies; i++) {
+
+					enemyOffSet1[i] = (random.nextFloat() - 0.5f) * (Gdx.graphics.getHeight() - 200);
+					enemyOffSet2[i] = (random.nextFloat() - 0.5f) * (Gdx.graphics.getHeight() - 200);
+					enemyOffSet3[i] = (random.nextFloat() - 0.5f) * (Gdx.graphics.getHeight() - 200);
+
+					enemyX[i] = Gdx.graphics.getWidth() - (i *  distance);
+
+					enemyCircle1[i] = new Circle();
+					enemyCircle2[i] = new Circle();
+					enemyCircle3[i] = new Circle();
+				}
+
+				velocity = 0;
+				scoreEnemy = 0;
+				score = 0;
+
+			}
+
 		}
 
 		batch.draw(bird, birdX, birdY , Gdx.graphics.getWidth()/20, Gdx.graphics.getHeight()/13);
 
+		font.draw(batch, String.valueOf(score), 50, 100);
+
 		batch.end();
 
 		birdCircle.set(birdX + (Gdx.graphics.getWidth()/40),birdY + (Gdx.graphics.getHeight()/26), (Gdx.graphics.getWidth()/20f) / 2f);
+		/*
+
+		Aşağıda yoruma alınan kısımlar circlelerın doğru eklenip eklenmediğini kontrol etmek için koyuldu
+
 		shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 		shapeRenderer.setColor(Color.BLACK);
 		shapeRenderer.circle(birdCircle.x, birdCircle.y, birdCircle.radius);
+		*/
+
 
 
 		for (int i = 0; i < numberOfEnemies; i++) {
+			/*
 			shapeRenderer.circle(enemyX[i] + (Gdx.graphics.getWidth()/40),Gdx.graphics.getHeight()/2 + enemyOffSet1[i] + (Gdx.graphics.getHeight()/26), Gdx.graphics.getWidth()/40);
 			shapeRenderer.circle(enemyX[i] + (Gdx.graphics.getWidth()/40),Gdx.graphics.getHeight()/2 + enemyOffSet2[i] + (Gdx.graphics.getHeight()/26), Gdx.graphics.getWidth()/40);
 			shapeRenderer.circle(enemyX[i] + (Gdx.graphics.getWidth()/40),Gdx.graphics.getHeight()/2 + enemyOffSet3[i] + (Gdx.graphics.getHeight()/26), Gdx.graphics.getWidth()/40);
+			*/
+
+			if (Intersector.overlaps(birdCircle, enemyCircle1[i]) || Intersector.overlaps(birdCircle, enemyCircle2[i]) || Intersector.overlaps(birdCircle, enemyCircle3[i])) {
+
+				//Oyun bittiğini gösterecek
+				gameState = 2;
+			}
+
 		}
 
-		shapeRenderer.end();
+		//shapeRenderer.end();
 
 	}
-	
+
 	@Override
 	public void dispose () {
 
